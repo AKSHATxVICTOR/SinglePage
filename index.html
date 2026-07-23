@@ -1,8 +1,170 @@
-<div style="font-family:Arial, sans-serif;max-width:460px;margin:40px auto;padding:24px;border-left:4px solid #f59e0b;background-color:#fefce8;color:#1f2937;line-height:1.6">
-  <h2 style="font-size:18px;margin-top:0;margin-bottom:8px;color:#9a3412;font-weight:bold">Simulation of safety training
-</h2>
-  <p style="margin:0 0 12px 0;font-size:14px">The email you just interacted with was a simulated password. No changes have been made to your account.
-.</p>
-  <p style="margin:0;font-size:14px;font-weight:bold;color:#78350f">Takeaway: Always check the sender's address and link the URLs before entering your credentials.
-.</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Account Security - Password Reset</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Arial, sans-serif;
+    background: #f3f4f6;
+    margin: 0;
+    padding: 40px 16px;
+    color: #1f2937;
+  }
+  .card {
+    max-width: 420px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+    padding: 32px;
+  }
+  .logo {
+    font-weight: bold;
+    font-size: 18px;
+    margin-bottom: 24px;
+    color: #111827;
+  }
+  h1 {
+    font-size: 20px;
+    margin: 0 0 6px 0;
+  }
+  .sub {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 0 0 24px 0;
+  }
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    margin-top: 16px;
+  }
+  input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+  }
+  input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
+  }
+  button {
+    width: 100%;
+    margin-top: 24px;
+    padding: 11px;
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button:hover { background: #1d4ed8; }
+
+  /* Reveal panel */
+  .reveal {
+    display: none;
+    font-family: Arial, sans-serif;
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 24px;
+    border-left: 4px solid #f59e0b;
+    background-color: #fefce8;
+    color: #1f2937;
+    line-height: 1.6;
+    border-radius: 8px;
+  }
+  .reveal h2 {
+    font-size: 18px;
+    margin: 0 0 8px 0;
+    color: #9a3412;
+  }
+  .reveal p { margin: 0 0 12px 0; font-size: 14px; }
+  .reveal .takeaway { font-weight: bold; color: #78350f; margin: 0; }
+  .reveal .log {
+    margin-top: 16px;
+    padding: 12px;
+    background: #fff;
+    border: 1px solid #fde68a;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #92400e;
+  }
+</style>
+</head>
+<body>
+
+<div class="card" id="resetForm">
+  <div class="logo">🔒 Account Portal</div>
+  <h1>Reset your password</h1>
+  <p class="sub">Enter your current password and choose a new one.</p>
+
+  <form id="pwForm" autocomplete="off">
+    <label for="oldpw">Current password</label>
+    <input type="password" id="oldpw" name="oldpw" autocomplete="off">
+
+    <label for="newpw">New password</label>
+    <input type="password" id="newpw" name="newpw" autocomplete="off">
+
+    <label for="otp">One-time code (sent to your email)</label>
+    <input type="text" id="otp" name="otp" autocomplete="off" inputmode="numeric">
+
+    <button type="submit">Reset Password</button>
+  </form>
 </div>
+
+<div class="reveal" id="revealPanel">
+  <h2>⚠️ This was a simulated phishing test</h2>
+  <p>The page you just interacted with was part of an internal security awareness exercise. No account changes were made, and no password or code you typed was captured or stored.</p>
+  <p class="takeaway">Takeaway: Always check the sender's address and hover over links before entering credentials anywhere.</p>
+  <div class="log" id="interactionLog"></div>
+</div>
+
+<script>
+  // ---- INTERACTION-ONLY LOGGING ----
+  // This intentionally never reads .value from any field.
+  // It only records THAT an interaction happened, and when.
+  const events = [];
+
+  function logEvent(name) {
+    events.push({ event: name, time: new Date().toISOString() });
+  }
+
+  ['oldpw', 'newpw', 'otp'].forEach(id => {
+    const field = document.getElementById(id);
+    field.addEventListener('focus', () => logEvent(id + '_focused'), { once: true });
+    field.addEventListener('input', () => logEvent(id + '_typed_in'), { once: true });
+  });
+
+  document.getElementById('pwForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    logEvent('form_submitted');
+
+    // IMPORTANT: clear any values from the DOM immediately, just in case.
+    // We never read these values into JS variables or send them anywhere.
+    document.getElementById('oldpw').value = '';
+    document.getElementById('newpw').value = '';
+    document.getElementById('otp').value = '';
+
+    // In a real deployment, you'd send `events` (booleans/timestamps only)
+    // to your training platform's logging endpoint here, e.g.:
+    // fetch('/api/sim-log', { method: 'POST', body: JSON.stringify({ userId, events }) });
+
+    document.getElementById('resetForm').style.display = 'none';
+    const panel = document.getElementById('revealPanel');
+    panel.style.display = 'block';
+    document.getElementById('interactionLog').textContent =
+      'Logged interactions (no credential values stored): ' +
+      events.map(ev => ev.event).join(', ');
+  });
+</script>
+
+</body>
+</html>
